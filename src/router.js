@@ -14,14 +14,15 @@ export function createRouter(routes) {
     .sort((first, second) => second.specificity.localeCompare(first.specificity))
 
   return async (req, res) => {
-    let pathSegments
+    let requestUrl
     try {
-      pathSegments = new URL(req.url, 'http://localhost').pathname.split('/')
+      requestUrl = new URL(req.url, 'http://localhost')
     } catch {
       sendJson(res, 400, { error: 'Invalid request URL' })
       return
     }
 
+    const pathSegments = requestUrl.pathname.split('/')
     const matches = routeTable.filter(
       ({ segments }) =>
         segments.length === pathSegments.length &&
@@ -61,6 +62,7 @@ export function createRouter(routes) {
     }
 
     req.params = params
+    req.query = requestUrl.searchParams
     try {
       await route.handler(req, res)
     } catch (error) {

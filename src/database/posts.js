@@ -6,14 +6,16 @@ pool.on('error', (error) => {
   console.error('PostgreSQL pool error:', error.message)
 })
 
-export async function listPosts() {
-  const { rows } = await pool.query(`
+export async function listPosts({ includeAll = false } = {}) {
+  const { rows } = await pool.query(
+    `
     SELECT id, title, content, published_at, created_at, approved_at, rejected_at
     FROM posts
-    WHERE approved_at IS NOT NULL
-      AND rejected_at IS NULL
+    WHERE $1::boolean OR (approved_at IS NOT NULL AND rejected_at IS NULL)
     ORDER BY created_at, id
-  `)
+  `,
+    [includeAll],
+  )
   return rows
 }
 
@@ -22,7 +24,7 @@ export async function getPostById(id) {
     `
     SELECT id, title, content, published_at, created_at, approved_at, rejected_at
     FROM posts
-    WHERE id = $1
+    WHERE id = $1 AND approved_at IS NOT NULL AND rejected_at IS NULL
   `,
     [id],
   )

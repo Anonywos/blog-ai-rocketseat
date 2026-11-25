@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import { nanoid } from 'nanoid'
 import {
   approvePost,
@@ -10,10 +11,32 @@ import { mastra } from '../mastra/index.js'
 import { postContentSchema } from '../mastra/agents/post-agent.js'
 import { sendJson } from '../router.js'
 
-const { POST_MODEL } = process.env
+const { POST_MODEL, POSTS_API_KEY } = process.env
+const expectedPostsApiKey = Buffer.from(POSTS_API_KEY ?? '')
 
-export async function handleListPosts(_req, res) {
-  const posts = await listPosts()
+function hasValidPostsApiKey(authorization) {
+  const token = /^Bearer +([^\s,]+)$/i.exec(authorization ?? '')?.[1]
+  if (!token || expectedPostsApiKey.length === 0) return false
+
+  const receivedKey = Buffer.from(token)
+  return (
+    //timingSafeEqual prevent timing attacks by comparing the tokens in constant time
+    receivedKey.length === expectedPostsApiKey.length &&
+    timingSafeEqual(receivedKey, expectedPostsApiKey)
+  )
+}
+
+export async function handleListPosts(req, res) {
+  const includeAll = req.query.has('include', 'all')
+  if (includeAll) {
+    res.setHeader('Cache-Control', 'no-store')
+    if (!hasValidPostsApiKey(req.headers.authorization)) {
+      sendJson(res, 403, { error: 'Forbidden' })
+      return
+    }
+  }
+
+  const posts = await listPosts({ includeAll })
   sendJson(res, 200, posts)
 }
 
