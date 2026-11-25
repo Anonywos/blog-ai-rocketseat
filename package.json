@@ -1,0 +1,41 @@
+{
+  "name": "blog-ai-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --env-file=.env.local --watch src/index.js",
+    "db:migrate": "node --env-file=.env.local ./node_modules/postgrator-cli/index.js migrate --config=postgrator.config.js",
+    "db:migrate:down": "node --env-file=.env.local ./node_modules/postgrator-cli/index.js migrate --config=postgrator.config.js --to=0",
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "env:setup": "copy .env.example .env.local",
+    "local:setup": "npm run env:setup && npm run infra:up && npm run db:migrate",
+    "lint": "node ./node_modules/oxlint/bin/oxlint .",
+    "format": "node ./node_modules/oxfmt/bin/oxfmt --write .",
+    "format:check": "node ./node_modules/oxfmt/bin/oxfmt --check ."
+  },
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@mastra/core": "^1.85.0",
+    "nanoid": "^6.0.2",
+    "pg": "^8.23.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "lefthook": "^2.2.2",
+    "lint-staged": "^17.6.2",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
+    "postgrator-cli": "^10.0.0"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs}": [
+      "node ./node_modules/oxlint/bin/oxlint",
+      "node ./node_modules/oxfmt/bin/oxfmt --write"
+    ]
+  }
+}

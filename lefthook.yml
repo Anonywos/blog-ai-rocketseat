@@ -1,0 +1,9 @@
+pre-commit:
+  jobs:
+    - name: lint-staged
+      run: node ./node_modules/lint-staged/bin/lint-staged.js
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: node ./node_modules/@commitlint/cli/cli.js --edit "{1}"
