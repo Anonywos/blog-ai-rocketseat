@@ -5,6 +5,7 @@ import {
   handleCreatePostDraft,
   handleGetPost,
   handleListPosts,
+  handleRejectPost,
 } from './routes/posts.js'
 
 const { API_HOST, API_PORT, API_PROTOCOL = 'http' } = process.env
@@ -34,6 +35,13 @@ const routes = [
     path: '/posts/:id/approve',
     handler: handleApprovePost,
     errorMessage: 'Failed to approve post',
+    invalidParamsMessage: 'Invalid post ID',
+  },
+  {
+    method: 'DELETE',
+    path: '/posts/:id/reject',
+    handler: handleRejectPost,
+    errorMessage: 'Failed to reject post',
     invalidParamsMessage: 'Invalid post ID',
   },
 ]

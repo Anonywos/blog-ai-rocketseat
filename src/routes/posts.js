@@ -1,5 +1,11 @@
 import { nanoid } from 'nanoid'
-import { approvePost, getPostById, insertPostDraft, listPosts } from '../database/posts.js'
+import {
+  approvePost,
+  getPostById,
+  insertPostDraft,
+  listPosts,
+  rejectPost,
+} from '../database/posts.js'
 import { mastra } from '../mastra/index.js'
 import { postContentSchema } from '../mastra/agents/post-agent.js'
 import { sendJson } from '../router.js'
@@ -64,6 +70,16 @@ export async function handleCreatePostDraft(req, res) {
 
 export async function handleApprovePost(req, res) {
   const post = await approvePost(req.params.id)
+  if (!post) {
+    sendJson(res, 404, { error: 'Post not found' })
+    return
+  }
+
+  sendJson(res, 200, post)
+}
+
+export async function handleRejectPost(req, res) {
+  const post = await rejectPost(req.params.id)
   if (!post) {
     sendJson(res, 404, { error: 'Post not found' })
     return
