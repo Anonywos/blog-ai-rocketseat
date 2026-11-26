@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "docker build -t blog-ai-nodejs .",
     "dev": "node --env-file=.env.local --watch src/index.js",
     "db:migrate": "node --env-file=.env.local ./node_modules/postgrator-cli/index.js migrate --config=postgrator.config.js",
     "db:migrate:down": "node --env-file=.env.local ./node_modules/postgrator-cli/index.js migrate --config=postgrator.config.js --to=0",
