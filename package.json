@@ -12,6 +12,10 @@
     "infra:down": "docker compose down",
     "env:setup": "copy .env.example .env.local",
     "local:setup": "npm run env:setup && npm run infra:up && npm run db:migrate",
+    "test": "node --env-file-if-exists=.env.local --test test/unit/*.test.js test/integration/*.test.js test/e2e/*.test.js",
+    "test:unit": "node --test test/unit/*.test.js",
+    "test:integration": "node --env-file-if-exists=.env.local --test test/integration/*.test.js",
+    "test:e2e": "node --env-file-if-exists=.env.local --test test/e2e/*.test.js",
     "lint": "node ./node_modules/oxlint/bin/oxlint .",
     "format": "node ./node_modules/oxfmt/bin/oxfmt --write .",
     "format:check": "node ./node_modules/oxfmt/bin/oxfmt --check ."
@@ -31,7 +35,8 @@
     "lint-staged": "^17.6.2",
     "oxfmt": "^0.79.0",
     "oxlint": "^1.94.0",
-    "postgrator-cli": "^10.0.0"
+    "postgrator-cli": "^10.0.0",
+    "supertest": "^7.0.0"
   },
   "lint-staged": {
     "*.{js,cjs,mjs}": [

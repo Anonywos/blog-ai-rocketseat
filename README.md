@@ -25,6 +25,7 @@ This project is a Node.js API for turning blog post ideas into complete Markdown
 - [x] Retrieve a published post by ID
 - [x] Approve a post
 - [x] Reject a post without deleting its database record
+- [x] Browse interactive API documentation and download its OpenAPI specification
 
 ### Business Rules
 
@@ -47,6 +48,7 @@ This project is a Node.js API for turning blog post ideas into complete Markdown
 - Creating an AI agent with Mastra and validating structured output with Zod
 - Switching AI models through configuration
 - Building a small Node.js HTTP router with path and query parameters
+- Documenting HTTP routes with OpenAPI and Swagger UI
 - Persisting posts with node-postgres and managing schema changes with migrations
 - Running PostgreSQL with Docker Compose and packaging a Node.js API with Docker
 - Using lint, formatting, Git hooks, and Conventional Commits in a Node.js project
@@ -54,6 +56,8 @@ This project is a Node.js API for turning blog post ideas into complete Markdown
 ## 📌 API Routes
 
 All routes return JSON. A post contains `id`, `title`, `content`, `published_at`, `created_at`, `approved_at`, and `rejected_at`. PostgreSQL sets the timestamps. The last three status timestamps are initially `null`.
+
+Interactive Swagger UI is available at `GET /api/docs`. The OpenAPI JSON document is available at `GET /api/docs/json`. The UI loads Swagger UI assets from a CDN, so the browser needs internet access; the JSON endpoint is served by the API itself.
 
 ### List published posts
 
@@ -202,4 +206,17 @@ npm run lint
 npm run format:check
 ```
 
-`npm run format` applies Oxfmt formatting. Lefthook and lint-staged run checks on staged JavaScript files before commits. Commitlint checks Conventional Commits messages. The project does not currently define automated test scripts.
+`npm run format` applies Oxfmt formatting. Lefthook and lint-staged run checks on staged JavaScript files before commits. Commitlint checks Conventional Commits messages.
+
+## 🧪 Running tests
+
+The tests use Node.js `--test`. E2E requests use Supertest. Integration and E2E tests need a running PostgreSQL instance and `TEST_DATABASE_URL` in `.env.local`. They create a temporary schema in that database, apply the posts table migration, and remove the schema afterward. They do not call an AI provider; E2E tests supply a deterministic agent response.
+
+```powershell
+npm run infra:up
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+```
+
+`npm test` runs all three suites. The database test account needs permission to create schemas. Use a disposable test database when possible, and do not point `TEST_DATABASE_URL` at production.

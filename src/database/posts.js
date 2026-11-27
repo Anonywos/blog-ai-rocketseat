@@ -6,48 +6,50 @@ pool.on('error', (error) => {
   console.error('PostgreSQL pool error:', error.message)
 })
 
-export async function listPosts({ includeAll = false } = {}) {
-  const { rows } = await pool.query(
-    `
+export function createPostsRepository(database) {
+  return {
+    async listPosts({ includeAll = false } = {}) {
+      const { rows } = await database.query(
+        `
     SELECT id, title, content, published_at, created_at, approved_at, rejected_at
     FROM posts
     WHERE $1::boolean OR (approved_at IS NOT NULL AND rejected_at IS NULL)
     ORDER BY created_at, id
   `,
-    [includeAll],
-  )
-  return rows
-}
+        [includeAll],
+      )
+      return rows
+    },
 
-export async function getPostById(id) {
-  const { rows } = await pool.query(
-    `
+    async getPostById(id) {
+      const { rows } = await database.query(
+        `
     SELECT id, title, content, published_at, created_at, approved_at, rejected_at
     FROM posts
     WHERE id = $1 AND approved_at IS NOT NULL AND rejected_at IS NULL
   `,
-    [id],
-  )
-  return rows[0]
-}
+        [id],
+      )
+      return rows[0]
+    },
 
-export async function insertPostDraft({ id, title, content }) {
-  const {
-    rows: [post],
-  } = await pool.query(
-    `
+    async insertPostDraft({ id, title, content }) {
+      const {
+        rows: [post],
+      } = await database.query(
+        `
     INSERT INTO posts (id, title, content)
     VALUES ($1, $2, $3)
     RETURNING id, title, content, published_at, created_at, approved_at, rejected_at
   `,
-    [id, title, content],
-  )
-  return post
-}
+        [id, title, content],
+      )
+      return post
+    },
 
-export async function approvePost(id) {
-  const { rows } = await pool.query(
-    `
+    async approvePost(id) {
+      const { rows } = await database.query(
+        `
     UPDATE posts
     SET approved_at = CURRENT_TIMESTAMP,
         published_at = CURRENT_TIMESTAMP,
@@ -55,20 +57,24 @@ export async function approvePost(id) {
     WHERE id = $1
     RETURNING id, title, content, published_at, created_at, approved_at, rejected_at
   `,
-    [id],
-  )
-  return rows[0]
-}
+        [id],
+      )
+      return rows[0]
+    },
 
-export async function rejectPost(id) {
-  const { rows } = await pool.query(
-    `
+    async rejectPost(id) {
+      const { rows } = await database.query(
+        `
     UPDATE posts
     SET rejected_at = CURRENT_TIMESTAMP, approved_at = NULL, published_at = NULL
     WHERE id = $1
     RETURNING id, title, content, published_at, created_at, approved_at, rejected_at
   `,
-    [id],
-  )
-  return rows[0]
+        [id],
+      )
+      return rows[0]
+    },
+  }
 }
+
+export const postsRepository = createPostsRepository(pool)
